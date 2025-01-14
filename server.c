@@ -77,14 +77,53 @@ void prompt_client_action(int socket, int result) {
         break;
     }
 
-    // if (send(socket,prompt, strlen(prompt),0) == -1); {
-    //     perror("Send failed");
-    // }
+    if (send(socket,prompt, strlen(prompt),0) == -1); {
+        perror("Send failed");
+    }
 
     send(socket,prompt, strlen(prompt),0);
 }
 
+void handle_client_upload(int socket) {
+    char filename[256];
+    FILE *file;
+    ssize_t bytes_received;
+    char buffer[1024];
 
+    send(socket, "Please send the filename to upload:", 35,0);
+
+    bytes_received = recv(socket,filename, sizeof(filename) - 1, 0);
+    if (bytes_received <= 0) {
+        perror("Error receiving filename");
+        return;
+    }
+    filename[bytes_received] = '\0';
+
+    file = fopen(filename, "wb");
+    if (file == NULL) {
+        perror("Error opening file for writing");
+        return;
+    }
+
+    // recieve the file content in parts
+    while ((bytes_received = recv(socket,buffer,sizeof(buffer),0)) > 0)
+    {
+        fwrite(buffer, sizeof(char), bytes_received, file);
+    }
+
+    if (bytes_received == 0) {
+        printf("File uploading complete.\n");
+    } else {
+        perror("Error receiving file data");
+    }
+
+    fclose(file);
+    
+}
+
+void handle_client_download
+
+ 
 void handle_client_action(int socket) {
     char buffer[1024] = {0};
 
@@ -182,6 +221,8 @@ int verify(int socket)
 }
 
 
+
+
 int main() {
     int sockfd, client_sock;
     struct sockaddr_in server_addr, client_addr;
@@ -227,8 +268,25 @@ int main() {
     // Valid
     case 1:
         //
-        prompt_client_action(client_sock, result);
-        handle_client_action(client_sock);
+        while (1)
+        {
+            prompt_client_action(client_sock, result);
+            handle_client_action(client_sock);
+
+            char buffer[1024] = {0};
+            ssize_t bytes_recieved = recv(client_sock,buffer, sizeof(buffer) -1, 0);
+
+            if (bytes_recieved == -1) {
+                perror("Recieve failed");
+                break;
+            }
+
+            buffer[bytes_recieved] = '\0';
+            if (strcmp(buffer, "3") == 0) {
+                printf("Client selected exit\n");
+                break;
+            }
+        }
         break;
     
     // Not valid: invalid password
