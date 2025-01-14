@@ -6,7 +6,7 @@ def start_client():
 
     # Step 2: Connect to the server (provide the host and port)
     host = '127.0.0.1'  # Server's IP address (localhost)
-    port = 12345         # The same port as the server
+    port = 8080       # The same port as the server
     try:
         client_socket.connect((host, port))
         print(f"Connected to server at {host}:{port}")

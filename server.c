@@ -29,11 +29,11 @@ int user_pass (char * user_or_password, FILE * fptr)
 
         tokens[counter] = split;
 
-        while (split != NULL && counter < 10)
+        while (split != NULL)
         {
             if (strcmp(user_or_password, tokens[counter]) != NULL) 
             {
-            printf("Found in the string.\n", split[counter]);
+            printf("Found in the string.%s\n", split[counter]);
             fclose(fptr);
             return 0;
             }
@@ -43,6 +43,11 @@ int user_pass (char * user_or_password, FILE * fptr)
         fclose(fptr);
         return -1;
     }
+}
+
+void prompt_client_action(int socket) {
+    char prompt[] = "Username and password valid. What would you like to do next? (1) Upload (2) Download:";
+    send(socket,prompt, sizeof(prompt),0);
 }
 
 int verify(int socket)
@@ -77,8 +82,8 @@ int verify(int socket)
 
             if(user_pass(tokens[1],fptr = fopen("password.csv","r")) == 0)
             {
-
                 printf("Username and password valid");
+                prompt_client_action(socket);
 
             }
             else 
@@ -95,7 +100,7 @@ int verify(int socket)
             printf("Invalid Username");
 
         }
-        for (i = 0; i < token_count; i++) 
+        for (int i = 0; i < token_count; i++) 
         {
         free(tokens[i]);
         }
@@ -143,7 +148,7 @@ int main() {
     
     
     // Receive data
-   verify(sockfd);
+   verify(client_sock);
      
     // Close sockets
     close(client_sock);
