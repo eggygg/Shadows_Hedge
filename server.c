@@ -74,7 +74,7 @@ int verify(int socket)
             tokens[token_count] = strdup(token);
             token_count++;
 
-            token = strtok(NULL, " ");
+            token = strtok(NULL, " "); 
 
         }
         if(user_pass(tokens[0],fptr = fopen("username.csv","r")) == 0)
