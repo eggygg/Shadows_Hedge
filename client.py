@@ -14,19 +14,37 @@ def sendmessage(client_socket, data):
 
 def upload(client_socket):
     try: 
-        # Reading file and sending data to server 
-        fi = open("upload.txt", "r") 
-        data = fi.read() 
-        if not data: 
-            return
-        while data: 
-            client_socket.send(str(data).encode()) 
-            data = fi.read() 
-        # File is closed after data is sent 
-        fi.close() 
+        with open("upload_file.txt", "r") as file:
+            while True:
+                data = file.read() 
+                if not data or data == "EOF": 
+                    break
+                client_socket.send(str(data).encode()) 
+            stamp("Upload completed successfully.")
+            print("Upload completed successfully.")
+        
 
-    except IOError: 
-        print("Error")
+    except IOError as e: 
+        stamp(f"Error during upload: {e}")
+        print(f"Error during upload: {e}")
+
+
+def download(client_socket):
+    try:
+        with open("downloaded_file.txt", "w") as file:
+            while True:
+                data = client_socket.recv(1024)
+                if not data or data.decode() == "EOF":
+                    break
+                file.write(data)
+
+            stamp("Download completed successfully.")
+            print("Download completed successfully.")
+
+    except Exception as e:
+        stamp(f"Error during download: {e}")
+        print(f"Error during download: {e}")
+
 
 def recvmessage(client_socket):
     data = client_socket.recv(1024)  # Buffer size is 1024 bytes
@@ -71,6 +89,7 @@ def start_client():
                 case 2:
                     sendmessage(client_socket, choice)
                     recvmessage(client_socket)
+                    download(client_socket)
                 case 3:
                     stamp(f"Disconnected from server at {host}:{port}")
                     break
