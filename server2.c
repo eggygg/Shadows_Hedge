@@ -59,7 +59,7 @@ int user_pass (char * user_or_password, FILE * fptr)
 
 void prompt_client_action(int socket, int result) {
     char prompt[256];
-
+    printf("Prompt_client Result %d\n", result);
     switch (result)
     {
     case 1:
@@ -318,20 +318,21 @@ int main() {
         {
             prompt_client_action(client_sock, result);
             handle_client_action(client_sock);
+            break;
 
-            char buffer[1024] = {0};
-            ssize_t bytes_recieved = recv(client_sock,buffer, sizeof(buffer) -1, 0);
+            // char buffer[1024] = {0};
+            // ssize_t bytes_recieved = recv(client_sock,buffer, sizeof(buffer) -1, 0);
 
-            if (bytes_recieved == -1) {
-                perror("Recieve failed");
-                break;
-            }
+            // if (bytes_recieved == -1) {
+            //     perror("Recieve failed");
+            //     break;
+            // }
 
-            buffer[bytes_recieved] = '\0';
-            if (strcmp(buffer, "3") == 0) {
-                printf("Client selected exit\n");
-                break;
-            }
+            // buffer[bytes_recieved] = '\0';
+            // if (strcmp(buffer, "3") == 0) {
+            //     printf("Client selected exit\n");
+            //     break;
+            // }
         }
         break;
     
@@ -354,3 +355,4 @@ int main() {
     close(sockfd);
     return 0;
 }
+
