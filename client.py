@@ -12,12 +12,15 @@ def sendmessage(client_socket, data):
     client_socket.send(data.encode())
     stamp(f"Sent to server: {data}")
 
-def upload(client_socket):
+def upload(client_socket, filename):
+   
     try: 
-        with open("upload_file.txt", "r") as file:
+        with open(filename, "r") as file:
             while True:
                 data = file.read() 
+                print(f"Data: {data}")
                 if not data or data == "EOF": 
+                    print("No more data")
                     break
                 client_socket.send(str(data).encode()) 
             stamp("Upload completed successfully.")
@@ -29,15 +32,19 @@ def upload(client_socket):
         print(f"Error during upload: {e}")
 
 
-def download(client_socket):
+def download(client_socket, filename):
+    count = 0
     try:
-        with open("downloaded_file.txt", "w") as file:
+        with open(filename, "w") as file:
             while True:
                 data = client_socket.recv(1024)
-                if not data or data.decode() == "EOF":
+                if not data:
+                    print(f"Data: {data}")
                     break
-                file.write(data)
-
+                decoded_data = data.decode()
+                file.write(decoded_data)
+                print(f"Hitting this{count}")
+                count+=1
             stamp("Download completed successfully.")
             print("Download completed successfully.")
 
@@ -85,25 +92,38 @@ def start_client():
                 case 1:
                     sendmessage(client_socket, choice)
                     recvmessage(client_socket)
-                    upload(client_socket)
+                    filename = input()
+                    print(f"filename you entered: {filename}")
+                    sendmessage(client_socket, filename)
+                    upload(client_socket, filename)
+                    # recvmessage(client_socket)
+                    print("underneath upload")
+                    break
                 case 2:
                     sendmessage(client_socket, choice)
                     recvmessage(client_socket)
-                    download(client_socket)
+                    filename = input()
+                    print(f"filename you entered: {filename}")
+                    sendmessage(client_socket, filename)
+                    download(client_socket, filename)
+                    # recvmessage(client_socket)
+                    print("underneath download")
+                    break
                 case 3:
                     stamp(f"Disconnected from server at {host}:{port}")
                     break
                 case _:
                     print("Invalid choice.")
-
+            
         # Step 4: Receive the server's response
-
+        
     except Exception as e:
         stamp(f"Error: {e}")
     except KeyboardInterrupt:
         stamp("Program interrupted by user.")
     finally:
         stamp(f"Disconnected from server at {host}:{port}")
+        print("Close out of program")
         # Step 5: Close the connection
         client_socket.close()
 
