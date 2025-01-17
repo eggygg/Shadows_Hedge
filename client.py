@@ -1,21 +1,21 @@
 import socket
 import datetime
-
+#logging 
 def stamp(message):
     ct = datetime.datetime.now()
     # print(message)
-    with open("log.txt", "a") as file:
+    with open("BCCD_Course/Networking_Project/log.txt", "a") as file:
         file.write(f"{ct}: {message}\n")
-
+#handling sent bytes
 def sendmessage(client_socket, data):
     # client_socket.send(combination.encode())
     client_socket.send(data.encode())
     stamp(f"Sent to server: {data}")
-
+# function for uploading files properly to the server
 def upload(client_socket, filename):
    
     try: 
-        with open(filename, "r") as file:
+        with open(f"BCCD_Course/Networking_Project/{filename}", "r") as file:
             while True:
                 data = file.read() 
                 print(f"Data: {data}")
@@ -31,11 +31,11 @@ def upload(client_socket, filename):
         stamp(f"Error during upload: {e}")
         print(f"Error during upload: {e}")
 
-
+# download files from the server
 def download(client_socket, filename):
-    count = 0
+    
     try:
-        with open(filename, "w") as file:
+        with open(f"BCCD_Course/Networking_Project/{filename}", "w") as file:
             while True:
                 data = client_socket.recv(1024)
                 if not data:
@@ -43,8 +43,7 @@ def download(client_socket, filename):
                     break
                 decoded_data = data.decode()
                 file.write(decoded_data)
-                print(f"Hitting this{count}")
-                count+=1
+    
             stamp("Download completed successfully.")
             print("Download completed successfully.")
 
@@ -53,6 +52,7 @@ def download(client_socket, filename):
         print(f"Error during download: {e}")
 
 
+#receiving messages from server.
 def recvmessage(client_socket):
     data = client_socket.recv(1024)  # Buffer size is 1024 bytes
     if not data:
@@ -61,7 +61,7 @@ def recvmessage(client_socket):
     print(data)
     stamp(f"Received from server: {data.decode()}\n")
     
-
+#starts the socket
 def start_client():
     # Step 1: Create a socket object
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -86,7 +86,7 @@ def start_client():
         recvmessage(client_socket)
 
         while True:
-            choice = input()
+            choice = input("What would you like to do?")
             # print(f"choice is {choice}")
             match int(choice):
                 case 1:
@@ -98,7 +98,7 @@ def start_client():
                     upload(client_socket, filename)
                     # recvmessage(client_socket)
                     print("underneath upload")
-                    break
+                    
                 case 2:
                     sendmessage(client_socket, choice)
                     recvmessage(client_socket)
@@ -106,15 +106,21 @@ def start_client():
                     print(f"filename you entered: {filename}")
                     sendmessage(client_socket, filename)
                     download(client_socket, filename)
-                    # recvmessage(client_socket)
+                    recvmessage(client_socket)
                     print("underneath download")
-                    break
+                    
                 case 3:
                     stamp(f"Disconnected from server at {host}:{port}")
+                    print("Disconnecting from server...")
                     break
+
+                case 4:
+                    sendmessage(client_socket, choice)
+                    recvmessage(client_socket)
+                    print("Directory recieved")
                 case _:
                     print("Invalid choice.")
-            
+
         # Step 4: Receive the server's response
         
     except Exception as e:
@@ -122,6 +128,7 @@ def start_client():
     except KeyboardInterrupt:
         stamp("Program interrupted by user.")
     finally:
+        # recvmessage(client_socket)
         stamp(f"Disconnected from server at {host}:{port}")
         print("Close out of program")
         # Step 5: Close the connection
